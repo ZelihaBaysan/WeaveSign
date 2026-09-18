@@ -15,9 +15,9 @@ MonoBehaviour:
   cardId: sign_017
   displayName: Yemek
   modelLabel: Yemek
-  difficulty: 1
-  baseDamage: 10
-  duration: 5
+  cardType: 1
+  difficulty: 3
+  basePower: 12
   movementType: 0
   handType: 0
   cardImage: {fileID: 0}

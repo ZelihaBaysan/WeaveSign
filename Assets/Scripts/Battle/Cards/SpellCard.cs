@@ -1,5 +1,11 @@
 using UnityEngine;
 
+public enum CardType
+{
+    Attack,
+    Heal
+}
+
 public enum MovementType
 {
     Static,
@@ -19,11 +25,12 @@ public class SpellCard : ScriptableObject
     public string displayName;
     public string modelLabel;
 
+    public CardType cardType;
+
     [Range(1, 3)]
     public int difficulty = 1;
 
-    public int baseDamage = 10;
-    public float duration = 5f;
+    public int basePower = 10;
 
     public MovementType movementType;
     public HandType handType;

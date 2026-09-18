@@ -1,27 +1,22 @@
+using System;
+using System.Collections;
 using UnityEngine;
 
-public struct RecognitionResult
+public class MockRecognitionService : RecognitionServiceBase
 {
-    public string predictedLabel;
-    public float confidence;
-
-    public RecognitionResult(string predictedLabel, float confidence)
+    public override IEnumerator Recognize(
+        SpellCard targetCard,
+        Action<RecognitionResult> onResult
+    )
     {
-        this.predictedLabel = predictedLabel;
-        this.confidence = confidence;
-    }
-}
+        // Gerçek modelin küçük işlem süresini taklit eder.
+        yield return new WaitForSeconds(0.2f);
 
-public class MockRecognitionService : MonoBehaviour
-{
-    public RecognitionResult Recognize(SpellCard targetCard)
-    {
-        // %0 - %100 arasında rastgele skor
-        float randomConfidence = Random.Range(0f, 1f);
+        float randomConfidence =
+            UnityEngine.Random.Range(0f, 1f);
 
-        // Test için %80 ihtimalle doğru sınıf,
-        // %20 ihtimalle yanlış sınıf döndür.
-        bool correctPrediction = Random.value <= 0.80f;
+        bool correctPrediction =
+            UnityEngine.Random.value <= 0.80f;
 
         string predictedLabel;
 
@@ -34,18 +29,21 @@ public class MockRecognitionService : MonoBehaviour
             predictedLabel = "yanlis_isaret";
         }
 
-        RecognitionResult result = new RecognitionResult(
-            predictedLabel,
-            randomConfidence
-        );
+        RecognitionResult result =
+            new RecognitionResult(
+                predictedLabel,
+                randomConfidence
+            );
 
         Debug.Log(
             "MOCK MODEL → Tahmin: " +
             result.predictedLabel +
             " | Skor: %" +
-            Mathf.RoundToInt(result.confidence * 100)
+            Mathf.RoundToInt(
+                result.confidence * 100
+            )
         );
 
-        return result;
+        onResult?.Invoke(result);
     }
 }
