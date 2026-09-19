@@ -1,117 +1,325 @@
 using UnityEngine;
 using UnityEditor;
+using System.Collections.Generic;
 
-public static class CardAssetGenerator
+public class CardAssetGenerator
 {
-    private const string FolderPath = "Assets/ScriptableObjects/Cards";
+    private const string FolderPath =
+        "Assets/Resources/Cards";
 
-    [MenuItem("WeaveSign/Generate Duel Cards")]
-    public static void GenerateCards()
+    private class CardConfig
     {
-        string[] displayNames =
+        public string id;
+        public string displayName;
+        public string modelLabel;
+
+        public CardType cardType;
+
+        public int difficulty;
+        public int power;
+
+        public CardConfig(
+            string id,
+            string displayName,
+            string modelLabel,
+            CardType cardType,
+            int difficulty,
+            int power
+        )
         {
-            "Anne",
-            "Arkadaş",
-            "Baba",
-            "Dur",
-            "Ev",
-            "Evet",
-            "Hayır",
-            "Kardeş",
-            "Merhaba",
-            "Nasıl",
-            "Nerede",
-            "Özür Dilemek",
-            "Tamam",
-            "Telefon",
-            "Teşekkürler",
-            "Tuvalet",
-            "Yemek",
-            "İçmek",
-            "İyi",
-            "Kötü"
+            this.id = id;
+            this.displayName = displayName;
+            this.modelLabel = modelLabel;
+            this.cardType = cardType;
+            this.difficulty = difficulty;
+            this.power = power;
+        }
+    }
+
+    [MenuItem(
+        "WeaveSign/Update Duel Cards"
+    )]
+    public static void UpdateCards()
+    {
+        CardConfig[] configs =
+        {
+            new CardConfig(
+                "sign_001",
+                "Anne",
+                "Anne",
+                CardType.Heal,
+                1,
+                6
+            ),
+
+            new CardConfig(
+                "sign_002",
+                "Arkadaş",
+                "Arkadas",
+                CardType.Heal,
+                2,
+                9
+            ),
+
+            new CardConfig(
+                "sign_003",
+                "Baba",
+                "Baba",
+                CardType.Heal,
+                1,
+                6
+            ),
+
+            new CardConfig(
+                "sign_004",
+                "Dur",
+                "Dur",
+                CardType.Attack,
+                1,
+                10
+            ),
+
+            new CardConfig(
+                "sign_005",
+                "Ev",
+                "Ev",
+                CardType.Heal,
+                1,
+                6
+            ),
+
+            new CardConfig(
+                "sign_006",
+                "Evet",
+                "Evet",
+                CardType.Attack,
+                1,
+                10
+            ),
+
+            new CardConfig(
+                "sign_007",
+                "Hayır",
+                "Hayir",
+                CardType.Attack,
+                2,
+                15
+            ),
+
+            new CardConfig(
+                "sign_008",
+                "Kardeş",
+                "Kardes",
+                CardType.Heal,
+                2,
+                9
+            ),
+
+            new CardConfig(
+                "sign_009",
+                "Merhaba",
+                "Merhaba",
+                CardType.Heal,
+                1,
+                6
+            ),
+
+            new CardConfig(
+                "sign_010",
+                "Nasıl",
+                "Nasil",
+                CardType.Attack,
+                2,
+                15
+            ),
+
+            new CardConfig(
+                "sign_011",
+                "Nerede",
+                "Nerede",
+                CardType.Attack,
+                2,
+                15
+            ),
+
+            new CardConfig(
+                "sign_012",
+                "Özür Dilemek",
+                "Ozur-Dilemek",
+                CardType.Heal,
+                3,
+                12
+            ),
+
+            new CardConfig(
+                "sign_013",
+                "Tamam",
+                "Tamam",
+                CardType.Attack,
+                1,
+                10
+            ),
+
+            new CardConfig(
+                "sign_014",
+                "Telefon",
+                "Telefon",
+                CardType.Attack,
+                3,
+                20
+            ),
+
+            new CardConfig(
+                "sign_015",
+                "Teşekkürler",
+                "Tesekkurler",
+                CardType.Heal,
+                2,
+                9
+            ),
+
+            new CardConfig(
+                "sign_016",
+                "Tuvalet",
+                "Tuvalet",
+                CardType.Attack,
+                3,
+                20
+            ),
+
+            new CardConfig(
+                "sign_017",
+                "Yemek",
+                "Yemek",
+                CardType.Heal,
+                3,
+                12
+            ),
+
+            new CardConfig(
+                "sign_018",
+                "İçmek",
+                "icmek",
+                CardType.Heal,
+                3,
+                12
+            ),
+
+            new CardConfig(
+                "sign_019",
+                "İyi",
+                "iyi",
+                CardType.Heal,
+                1,
+                6
+            ),
+
+            new CardConfig(
+                "sign_020",
+                "Kötü",
+                "kotu",
+                CardType.Attack,
+                3,
+                20
+            )
         };
 
-        string[] modelLabels =
+        string[] guids =
+            AssetDatabase.FindAssets(
+                "t:SpellCard",
+                new[] { FolderPath }
+            );
+
+        Dictionary<string, SpellCard>
+            existingCards =
+            new Dictionary<string, SpellCard>();
+
+        foreach (string guid in guids)
         {
-            "Anne",
-            "Arkadas",
-            "Baba",
-            "Dur",
-            "Ev",
-            "Evet",
-            "Hayir",
-            "Kardes",
-            "Merhaba",
-            "Nasil",
-            "Nerede",
-            "Ozur-Dilemek",
-            "Tamam",
-            "Telefon",
-            "Tesekkurler",
-            "Tuvalet",
-            "Yemek",
-            "icmek",
-            "iyi",
-            "kotu"
-        };
+            string path =
+                AssetDatabase.GUIDToAssetPath(
+                    guid
+                );
 
-        string[] fileNames =
-        {
-            "Anne",
-            "Arkadas",
-            "Baba",
-            "Dur",
-            "Ev",
-            "Evet",
-            "Hayir",
-            "Kardes",
-            "Merhaba",
-            "Nasil",
-            "Nerede",
-            "Ozur_Dilemek",
-            "Tamam",
-            "Telefon",
-            "Tesekkurler",
-            "Tuvalet",
-            "Yemek",
-            "icmek",
-            "iyi",
-            "kotu"
-        };
+            SpellCard card =
+                AssetDatabase.LoadAssetAtPath
+                <SpellCard>(path);
 
-        for (int i = 0; i < displayNames.Length; i++)
-        {
-            string id = $"sign_{i + 1:000}";
-            string assetPath = $"{FolderPath}/Sign_{i + 1:000}_{fileNames[i]}.asset";
-
-            // Kart zaten varsa tekrar oluşturma.
-            SpellCard existingCard =
-                AssetDatabase.LoadAssetAtPath<SpellCard>(assetPath);
-
-            if (existingCard != null)
+            if (
+                card != null &&
+                !string.IsNullOrEmpty(
+                    card.modelLabel
+                )
+            )
             {
-                Debug.Log($"Zaten var, atlandı: {assetPath}");
-                continue;
+                existingCards[
+                    card.modelLabel
+                ] = card;
+            }
+        }
+
+        foreach (
+            CardConfig config in configs
+        )
+        {
+            SpellCard card;
+
+            if (
+                existingCards.ContainsKey(
+                    config.modelLabel
+                )
+            )
+            {
+                card =
+                    existingCards[
+                        config.modelLabel
+                    ];
+            }
+            else
+            {
+                card =
+                    ScriptableObject
+                    .CreateInstance
+                    <SpellCard>();
+
+                string newPath =
+                    FolderPath +
+                    "/" +
+                    config.id +
+                    ".asset";
+
+                AssetDatabase.CreateAsset(
+                    card,
+                    newPath
+                );
             }
 
-            SpellCard card = ScriptableObject.CreateInstance<SpellCard>();
+            card.cardId =
+                config.id;
 
-            card.cardId = id;
-            card.displayName = displayNames[i];
-            card.modelLabel = modelLabels[i];
+            card.displayName =
+                config.displayName;
 
-            // Bunları daha sonra kartlara göre dengeleyeceğiz.
-            card.difficulty = 1;
-            card.baseDamage = 10;
-            card.duration = 5f;
+            card.modelLabel =
+                config.modelLabel;
 
-            AssetDatabase.CreateAsset(card, assetPath);
+            card.cardType =
+                config.cardType;
+
+            card.difficulty =
+                config.difficulty;
+
+            card.basePower =
+                config.power;
+
+            EditorUtility.SetDirty(card);
         }
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        Debug.Log("WeaveSign: Düello kartları oluşturuldu!");
+        Debug.Log(
+            "20 düello kartı güncellendi!"
+        );
     }
 }

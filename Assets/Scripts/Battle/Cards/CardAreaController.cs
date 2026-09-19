@@ -7,6 +7,7 @@ public class CardAreaController : MonoBehaviour
     public BattleManager battleManager;
 
     private List<SpellCard> allCards = new List<SpellCard>();
+    private List<SpellCard> usedCards = new List<SpellCard>();
 
     void Start()
     {
@@ -26,13 +27,22 @@ public class CardAreaController : MonoBehaviour
 
     void ShowRandomCards(int count)
     {
-        if (allCards.Count < count)
+        List<SpellCard> availableCards = new List<SpellCard>();
+
+        foreach (SpellCard card in allCards)
         {
-            Debug.LogError("Yeterli kart bulunamadı!");
-            return;
+            if (!usedCards.Contains(card))
+            {
+                availableCards.Add(card);
+            }
         }
 
-        List<SpellCard> availableCards = new List<SpellCard>(allCards);
+        // Kartlar tükenirse kullanılan kartları sıfırla.
+        if (availableCards.Count < count)
+        {
+            usedCards.Clear();
+            availableCards = new List<SpellCard>(allCards);
+        }
 
         for (int i = 0; i < count; i++)
         {
@@ -52,12 +62,19 @@ public class CardAreaController : MonoBehaviour
         }
     }
 
-    public void OnCardSelected(SpellCard selectedCard, CardView selectedCardView)
+    public void OnCardSelected(
+        SpellCard selectedCard,
+        CardView selectedCardView
+    )
     {
         Debug.Log("Seçilen kart: " + selectedCard.displayName);
 
+        // Kullanılan kart tekrar gelmesin.
+        usedCards.Add(selectedCard);
+
         battleManager.SelectCard(selectedCard);
 
+        // Diğer 4 kartı yok et.
         foreach (Transform child in transform)
         {
             if (child != selectedCardView.transform)
@@ -65,5 +82,17 @@ public class CardAreaController : MonoBehaviour
                 Destroy(child.gameObject);
             }
         }
+    }
+
+    public void StartNewTurn()
+    {
+        // Önce eski seçili kartı temizle.
+        foreach (Transform child in transform)
+        {
+            Destroy(child.gameObject);
+        }
+
+        // Yeni 5 kart oluştur.
+        ShowRandomCards(5);
     }
 }

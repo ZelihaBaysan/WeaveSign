@@ -15,9 +15,9 @@ MonoBehaviour:
   cardId: sign_014
   displayName: Telefon
   modelLabel: Telefon
-  difficulty: 1
-  baseDamage: 10
-  duration: 5
+  cardType: 0
+  difficulty: 3
+  basePower: 20
   movementType: 0
   handType: 0
   cardImage: {fileID: 0}

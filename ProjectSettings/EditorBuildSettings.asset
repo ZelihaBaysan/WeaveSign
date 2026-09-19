@@ -9,10 +9,22 @@ EditorBuildSettings:
     path: Assets/Scenes/SampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
   - enabled: 1
-    path: Assets/Scenes/MainMenu.unity
+    path: Assets/Scenes/MainMenu/MainMenu.unity
     guid: 954152a1eee64fb469a63117225de841
   - enabled: 1
-    path: Assets/Scenes/Battle.unity
+    path: Assets/Scenes/Battle/Battle.unity
     guid: 27d94d6aa5ea6df4991f9ab2a0d58364
+  - enabled: 1
+    path: Assets/Scenes/Learning/WordLearning.unity
+    guid: 5585aac1e5c9b4e4f93f4b42d13aa50e
+  - enabled: 1
+    path: Assets/Scenes/Learning/LetterLearning.unity
+    guid: c82c0b2e2215d984f8a79122e0cacec7
+  - enabled: 1
+    path: Assets/Scenes/Learning/LearningMenu.unity
+    guid: 14b615063484ac74d9451f4b74672ac9
+  - enabled: 1
+    path: Assets/Scenes/NameWorkshop/NameWorkshop.unity
+    guid: 7ad34f11ee70bc04393a6787ab4b3b8d
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

@@ -15,9 +15,9 @@ MonoBehaviour:
   cardId: sign_010
   displayName: "Nas\u0131l"
   modelLabel: Nasil
-  difficulty: 1
-  baseDamage: 10
-  duration: 5
+  cardType: 0
+  difficulty: 2
+  basePower: 15
   movementType: 0
   handType: 0
   cardImage: {fileID: 0}
