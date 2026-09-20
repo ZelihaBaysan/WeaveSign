@@ -124,12 +124,18 @@ public class BattleManager : MonoBehaviour
         battleStatusText.text =
             "DEĞERLENDİRİLİYOR...";
 
+        RecognitionRequest request =
+    new RecognitionRequest(
+        RecognitionModelType.Word,
+        selectedCard.modelLabel
+    );
+
         RecognitionResult result = default;
         bool resultReceived = false;
 
         yield return StartCoroutine(
             recognitionService.Recognize(
-                selectedCard,
+                request,
                 recognitionResult =>
                 {
                     result = recognitionResult;
@@ -137,6 +143,17 @@ public class BattleManager : MonoBehaviour
                 }
             )
         );
+
+        if (!resultReceived)
+        {
+            Debug.LogError(
+                "Recognition sonucu alınamadı!"
+            );
+
+            yield break;
+        }
+
+        ApplyRecognitionResult(result);
 
         if (!resultReceived)
         {
