@@ -5,7 +5,7 @@ using UnityEngine;
 public abstract class RecognitionServiceBase : MonoBehaviour
 {
     public abstract IEnumerator Recognize(
-        SpellCard targetCard,
+        RecognitionRequest request,
         Action<RecognitionResult> onResult
     );
 }

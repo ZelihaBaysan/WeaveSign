@@ -4,29 +4,67 @@ using UnityEngine;
 
 public class MockRecognitionService : RecognitionServiceBase
 {
+    private readonly string[] mockLetterLabels =
+    {
+        "A", "B", "C", "Ç", "D", "E", "F",
+        "G", "Ğ", "H", "I", "İ", "J", "K",
+        "L", "M", "N", "O", "Ö", "P", "R",
+        "S", "Ş", "T", "U", "Ü", "V", "Y", "Z",
+        "nothing", "del", "space"
+    };
+
     public override IEnumerator Recognize(
-        SpellCard targetCard,
+        RecognitionRequest request,
         Action<RecognitionResult> onResult
     )
     {
-        // Gerçek modelin küçük işlem süresini taklit eder.
         yield return new WaitForSeconds(0.2f);
 
         float randomConfidence =
-            UnityEngine.Random.Range(0f, 1f);
-
-        bool correctPrediction =
-            UnityEngine.Random.value <= 0.80f;
+            UnityEngine.Random.Range(0.55f, 1f);
 
         string predictedLabel;
 
-        if (correctPrediction)
+        // Harf/Kelime öğrenme ve düelloda
+        // beklenen cevap var.
+        if (!string.IsNullOrEmpty(request.expectedLabel))
         {
-            predictedLabel = targetCard.modelLabel;
+            bool correctPrediction =
+                UnityEngine.Random.value <= 0.80f;
+
+            if (correctPrediction)
+            {
+                predictedLabel =
+                    request.expectedLabel;
+            }
+            else
+            {
+                predictedLabel =
+                    request.modelType == RecognitionModelType.Letter
+                    ? "yanlis_harf"
+                    : "yanlis_isaret";
+            }
+        }
+
+        // İsmini Yaz Atölyesi:
+        // beklenen cevap yok, model ne gördüyse döndürüyor.
+        else if (
+            request.modelType ==
+            RecognitionModelType.Letter
+        )
+        {
+            predictedLabel =
+                mockLetterLabels[
+                    UnityEngine.Random.Range(
+                        0,
+                        mockLetterLabels.Length
+                    )
+                ];
         }
         else
         {
-            predictedLabel = "yanlis_isaret";
+            predictedLabel =
+                "yanlis_isaret";
         }
 
         RecognitionResult result =
@@ -36,7 +74,9 @@ public class MockRecognitionService : RecognitionServiceBase
             );
 
         Debug.Log(
-            "MOCK MODEL → Tahmin: " +
+            "MOCK MODEL → Model: " +
+            request.modelType +
+            " | Tahmin: " +
             result.predictedLabel +
             " | Skor: %" +
             Mathf.RoundToInt(
