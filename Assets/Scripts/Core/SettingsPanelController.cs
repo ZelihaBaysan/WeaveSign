@@ -4,8 +4,8 @@ using UnityEngine.UI;
 
 public class SettingsPanelController : MonoBehaviour
 {
+    [Header("Settings UI")]
     public GameObject settingsPanel;
-
     public Slider masterVolumeSlider;
     public Slider musicVolumeSlider;
 
@@ -14,7 +14,7 @@ public class SettingsPanelController : MonoBehaviour
 
     void Start()
     {
-        // Ayarlar ekranını tamamen opak yap.
+        // Settings ekranı tamamen opak olsun.
         Image panelImage =
             settingsPanel.GetComponent<Image>();
 
@@ -25,17 +25,31 @@ public class SettingsPanelController : MonoBehaviour
             panelImage.color = color;
         }
 
-        float savedMasterVolume =
-            PlayerPrefs.GetFloat(
-                MasterVolumeKey,
-                1f
-            );
+        float savedMasterVolume;
+        float savedMusicVolume;
 
-        float savedMusicVolume =
-            PlayerPrefs.GetFloat(
-                MusicVolumeKey,
-                1f
-            );
+        if (AudioManager.Instance != null)
+        {
+            savedMasterVolume =
+                AudioManager.Instance.GetMasterVolume();
+
+            savedMusicVolume =
+                AudioManager.Instance.GetMusicVolume();
+        }
+        else
+        {
+            savedMasterVolume =
+                PlayerPrefs.GetFloat(
+                    MasterVolumeKey,
+                    1f
+                );
+
+            savedMusicVolume =
+                PlayerPrefs.GetFloat(
+                    MusicVolumeKey,
+                    1f
+                );
+        }
 
         masterVolumeSlider.value =
             savedMasterVolume;
@@ -43,16 +57,13 @@ public class SettingsPanelController : MonoBehaviour
         musicVolumeSlider.value =
             savedMusicVolume;
 
-        AudioListener.volume =
-            savedMasterVolume;
+        masterVolumeSlider.onValueChanged.AddListener(
+            SetMasterVolume
+        );
 
-        masterVolumeSlider
-            .onValueChanged
-            .AddListener(SetMasterVolume);
-
-        musicVolumeSlider
-            .onValueChanged
-            .AddListener(SetMusicVolume);
+        musicVolumeSlider.onValueChanged.AddListener(
+            SetMusicVolume
+        );
 
         settingsPanel.SetActive(false);
     }
@@ -61,10 +72,7 @@ public class SettingsPanelController : MonoBehaviour
     {
         settingsPanel.SetActive(true);
 
-        // SettingsUI'yi diğer UI'ların önüne getir.
         transform.SetAsLastSibling();
-
-        // Paneli de en öne getir.
         settingsPanel.transform.SetAsLastSibling();
     }
 
@@ -75,24 +83,43 @@ public class SettingsPanelController : MonoBehaviour
 
     public void SetMasterVolume(float value)
     {
-        AudioListener.volume = value;
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.SetMasterVolume(
+                value
+            );
+        }
+        else
+        {
+            AudioListener.volume =
+                value;
 
-        PlayerPrefs.SetFloat(
-            MasterVolumeKey,
-            value
-        );
+            PlayerPrefs.SetFloat(
+                MasterVolumeKey,
+                value
+            );
 
-        PlayerPrefs.Save();
+            PlayerPrefs.Save();
+        }
     }
 
     public void SetMusicVolume(float value)
     {
-        PlayerPrefs.SetFloat(
-            MusicVolumeKey,
-            value
-        );
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.SetMusicVolume(
+                value
+            );
+        }
+        else
+        {
+            PlayerPrefs.SetFloat(
+                MusicVolumeKey,
+                value
+            );
 
-        PlayerPrefs.Save();
+            PlayerPrefs.Save();
+        }
     }
 
     public void GoToMainMenu()

@@ -27,6 +27,7 @@ public class NameWorkshopController : MonoBehaviour
     public int minimumSuccessScore = 70;
 
     private LearningItemData[] letterItems;
+
     private List<LearningItemData> nameLetters =
         new List<LearningItemData>();
 
@@ -66,12 +67,17 @@ public class NameWorkshopController : MonoBehaviour
         if (recognitionInProgress)
             return;
 
-        if (letterItems == null ||
-            letterItems.Length == 0)
+        if (
+            letterItems == null ||
+            letterItems.Length == 0
+        )
         {
             feedbackText.gameObject.SetActive(true);
+
             feedbackText.text =
                 "HARF VERİLERİ BULUNAMADI";
+
+            PlayMistakeSound();
 
             return;
         }
@@ -82,8 +88,11 @@ public class NameWorkshopController : MonoBehaviour
         if (string.IsNullOrEmpty(rawName))
         {
             feedbackText.gameObject.SetActive(true);
+
             feedbackText.text =
                 "ÖNCE İSMİNİ YAZ";
+
+            PlayMistakeSound();
 
             return;
         }
@@ -96,9 +105,11 @@ public class NameWorkshopController : MonoBehaviour
 
         nameLetters.Clear();
 
-        for (int i = 0;
-             i < enteredName.Length;
-             i++)
+        for (
+            int i = 0;
+            i < enteredName.Length;
+            i++
+        )
         {
             char character =
                 enteredName[i];
@@ -124,6 +135,8 @@ public class NameWorkshopController : MonoBehaviour
                     "DESTEKLENMEYEN KARAKTER: " +
                     letter;
 
+                PlayMistakeSound();
+
                 return;
             }
 
@@ -136,6 +149,8 @@ public class NameWorkshopController : MonoBehaviour
 
             feedbackText.text =
                 "GEÇERLİ BİR İSİM YAZ";
+
+            PlayMistakeSound();
 
             return;
         }
@@ -213,6 +228,7 @@ public class NameWorkshopController : MonoBehaviour
             if (currentItem.signImage != null)
             {
                 signImage.enabled = true;
+
                 signImage.sprite =
                     currentItem.signImage;
 
@@ -233,22 +249,29 @@ public class NameWorkshopController : MonoBehaviour
             memoryRound = true;
             currentIndex = 0;
 
-            UpdateCurrentLetter();
-
             feedbackText.text =
                 "ÖĞRENME TURU TAMAMLANDI!\n" +
                 "ŞİMDİ GÖRSELE BAKMADAN TEKRAR YAP.";
 
+            UpdateCurrentLetter();
+
             return;
         }
 
-        // İkinci tur da tamamlandı.
+        // Ezber turu da tamamlandı.
         CompleteWorkshop();
     }
 
     void CompleteWorkshop()
     {
+        // Final zafer sesi
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayVictory();
+        }
+
         targetLetterText.gameObject.SetActive(true);
+
         targetLetterText.text =
             "TEBRİKLER!";
 
@@ -325,7 +348,10 @@ public class NameWorkshopController : MonoBehaviour
             feedbackText.text =
                 "SONUÇ ALINAMADI";
 
+            PlayMistakeSound();
+
             recognitionInProgress = false;
+
             yield break;
         }
 
@@ -341,19 +367,37 @@ public class NameWorkshopController : MonoBehaviour
         bool enoughConfidence =
             score >= minimumSuccessScore;
 
-        if (correctLabel &&
-            enoughConfidence)
+        if (
+            correctLabel &&
+            enoughConfidence
+        )
         {
+            currentIndex++;
+
+            bool completingMemoryRound =
+                memoryRound &&
+                currentIndex >= nameLetters.Count;
+
+            // Final harfte Success ve Victory
+            // aynı anda çalmasın.
+            if (!completingMemoryRound)
+            {
+                if (AudioManager.Instance != null)
+                {
+                    AudioManager.Instance.PlaySuccess();
+                }
+            }
+
             feedbackText.text =
                 "DOĞRU! ✓\nSKOR: %" +
                 score;
-
-            currentIndex++;
 
             UpdateCurrentLetter();
         }
         else
         {
+            PlayMistakeSound();
+
             feedbackText.text =
                 "TEKRAR DENE\n" +
                 "TAHMİN: " +
@@ -363,6 +407,14 @@ public class NameWorkshopController : MonoBehaviour
         }
 
         recognitionInProgress = false;
+    }
+
+    void PlayMistakeSound()
+    {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayMistake();
+        }
     }
 
     public void ResetWorkshop()

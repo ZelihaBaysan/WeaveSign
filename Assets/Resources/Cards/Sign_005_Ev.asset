@@ -15,9 +15,9 @@ MonoBehaviour:
   cardId: sign_005
   displayName: Ev
   modelLabel: Ev
-  cardType: 1
+  cardType: 0
   difficulty: 1
-  basePower: 6
+  basePower: 20
   movementType: 0
   handType: 0
   cardImage: {fileID: 0}

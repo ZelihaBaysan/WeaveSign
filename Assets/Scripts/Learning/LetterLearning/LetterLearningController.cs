@@ -264,6 +264,11 @@ public class LetterLearningController : MonoBehaviour
 
         if (!resultReceived)
         {
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlayMistake();
+            }
+
             feedbackText.text =
                 "SONUÇ ALINAMADI";
 
@@ -287,6 +292,11 @@ public class LetterLearningController : MonoBehaviour
 
         if (success)
         {
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlaySuccess();
+            }
+
             feedbackText.text =
                 "BAŞARILI!" +
                 "\nSKOR: %" +
@@ -294,6 +304,11 @@ public class LetterLearningController : MonoBehaviour
         }
         else
         {
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlayMistake();
+            }
+
             feedbackText.text =
                 "TEKRAR DENE" +
                 "\nTAHMİN: " +

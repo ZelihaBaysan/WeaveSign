@@ -17,7 +17,7 @@ MonoBehaviour:
   modelLabel: Nasil
   cardType: 0
   difficulty: 2
-  basePower: 15
+  basePower: 30
   movementType: 0
   handType: 0
   cardImage: {fileID: 0}

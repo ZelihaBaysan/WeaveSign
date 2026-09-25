@@ -1,35 +1,48 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
 
 public enum BattleState
 {
-    CardSelection,     // Oyuncu kart seçiyor
-    Preparing,         // 3 - 2 - 1
-    Performing,        // İşaret yapılıyor
-    Resolving,         // Model sonucu değerlendiriliyor
-    TurnTransition,    // Yeni tura geçiliyor
-    GameOver           // Oyun bitti
+    CardSelection,
+    Preparing,
+    Performing,
+    Resolving,
+    TurnTransition,
+    GameOver
 }
 
 public class BattleManager : MonoBehaviour
 {
+    [Header("Can Sistemi")]
+    public int maxHealth = 100;
     public int player1Health = 100;
     public int player2Health = 100;
 
+    [Header("Mevcut HUD Yazıları")]
     public TMP_Text player1HealthText;
     public TMP_Text player2HealthText;
     public TMP_Text turnText;
     public TMP_Text battleStatusText;
 
+    [Header("HP Barları")]
+    public Slider player1HPBar;
+    public Slider player2HPBar;
+
+    public TMP_Text player1HPText;
+    public TMP_Text player2HPText;
+
+    [Header("Sonuç Ekranı")]
     public GameObject resultPanel;
     public TMP_Text winnerText;
 
+    [Header("Sistemler")]
     public RecognitionServiceBase recognitionService;
     public CardAreaController cardAreaController;
 
-    // Bütün kartlar için ortak hareket süresi
+    [Header("Aksiyon")]
     public int actionDuration = 5;
 
     private int currentPlayer = 1;
@@ -41,14 +54,36 @@ public class BattleManager : MonoBehaviour
 
     void Start()
     {
+        player1Health = maxHealth;
+        player2Health = maxHealth;
+
         currentPlayer = Random.Range(1, 3);
 
         battleStatusText.gameObject.SetActive(false);
         resultPanel.SetActive(false);
 
+        SetupHealthBars();
+
         SetState(BattleState.CardSelection);
 
         UpdateUI();
+    }
+
+    void SetupHealthBars()
+    {
+        if (player1HPBar != null)
+        {
+            player1HPBar.minValue = 0;
+            player1HPBar.maxValue = maxHealth;
+            player1HPBar.value = player1Health;
+        }
+
+        if (player2HPBar != null)
+        {
+            player2HPBar.minValue = 0;
+            player2HPBar.maxValue = maxHealth;
+            player2HPBar.value = player2Health;
+        }
     }
 
     void SetState(BattleState newState)
@@ -62,7 +97,6 @@ public class BattleManager : MonoBehaviour
 
     public void SelectCard(SpellCard card)
     {
-        // Sadece kart seçim aşamasında kart seçilebilir
         if (gameOver)
             return;
 
@@ -110,7 +144,6 @@ public class BattleManager : MonoBehaviour
 
         SetState(BattleState.Performing);
 
-        // Ortak hareket süresi
         for (int i = actionDuration; i > 0; i--)
         {
             battleStatusText.text =
@@ -124,11 +157,23 @@ public class BattleManager : MonoBehaviour
         battleStatusText.text =
             "DEĞERLENDİRİLİYOR...";
 
+        if (recognitionService == null)
+        {
+            Debug.LogError(
+                "Recognition Service bağlı değil!"
+            );
+
+            battleStatusText.text =
+                "RECOGNITION SERVICE BAĞLI DEĞİL";
+
+            yield break;
+        }
+
         RecognitionRequest request =
-    new RecognitionRequest(
-        RecognitionModelType.Word,
-        selectedCard.modelLabel
-    );
+            new RecognitionRequest(
+                RecognitionModelType.Word,
+                selectedCard.modelLabel
+            );
 
         RecognitionResult result = default;
         bool resultReceived = false;
@@ -150,16 +195,8 @@ public class BattleManager : MonoBehaviour
                 "Recognition sonucu alınamadı!"
             );
 
-            yield break;
-        }
-
-        ApplyRecognitionResult(result);
-
-        if (!resultReceived)
-        {
-            Debug.LogError(
-                "Recognition sonucu alınamadı!"
-            );
+            battleStatusText.text =
+                "SONUÇ ALINAMADI";
 
             yield break;
         }
@@ -254,6 +291,12 @@ public class BattleManager : MonoBehaviour
                 BattleState.GameOver
             );
 
+            // Zafer sesi
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlayVictory();
+            }
+
             UpdateUI();
 
             return;
@@ -277,19 +320,29 @@ public class BattleManager : MonoBehaviour
         int score
     )
     {
+        // Yanlış / başarısız sesi
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayMistake();
+        }
+
         if (currentPlayer == 1)
         {
-            player1Health -= 5;
-
-            if (player1Health < 0)
-                player1Health = 0;
+            player1Health =
+                Mathf.Clamp(
+                    player1Health - 5,
+                    0,
+                    maxHealth
+                );
         }
         else
         {
-            player2Health -= 5;
-
-            if (player2Health < 0)
-                player2Health = 0;
+            player2Health =
+                Mathf.Clamp(
+                    player2Health - 5,
+                    0,
+                    maxHealth
+                );
         }
 
         battleStatusText.text =
@@ -306,19 +359,29 @@ public class BattleManager : MonoBehaviour
         int score
     )
     {
+        // Saldırı sesi
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayAttack();
+        }
+
         if (currentPlayer == 1)
         {
-            player2Health -= finalDamage;
-
-            if (player2Health < 0)
-                player2Health = 0;
+            player2Health =
+                Mathf.Clamp(
+                    player2Health - finalDamage,
+                    0,
+                    maxHealth
+                );
         }
         else
         {
-            player1Health -= finalDamage;
-
-            if (player1Health < 0)
-                player1Health = 0;
+            player1Health =
+                Mathf.Clamp(
+                    player1Health - finalDamage,
+                    0,
+                    maxHealth
+                );
         }
 
         if (score >= 95)
@@ -346,6 +409,12 @@ public class BattleManager : MonoBehaviour
         int score
     )
     {
+        // Heal sesi
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayHeal();
+        }
+
         int actualHeal = 0;
 
         if (currentPlayer == 1)
@@ -357,7 +426,7 @@ public class BattleManager : MonoBehaviour
                 Mathf.Clamp(
                     player1Health + healAmount,
                     0,
-                    100
+                    maxHealth
                 );
 
             actualHeal =
@@ -373,7 +442,7 @@ public class BattleManager : MonoBehaviour
                 Mathf.Clamp(
                     player2Health + healAmount,
                     0,
-                    100
+                    maxHealth
                 );
 
             actualHeal =
@@ -435,51 +504,49 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    public void TestAttack()
-    {
-        if (gameOver)
-            return;
-
-        if (currentPlayer == 1)
-        {
-            player2Health -= 10;
-
-            if (player2Health < 0)
-                player2Health = 0;
-        }
-        else
-        {
-            player1Health -= 10;
-
-            if (player1Health < 0)
-                player1Health = 0;
-        }
-
-        CheckGameOver();
-
-        if (gameOver)
-        {
-            SetState(
-                BattleState.GameOver
-            );
-        }
-        else
-        {
-            ChangeTurn();
-        }
-
-        UpdateUI();
-    }
-
     void UpdateUI()
     {
-        player1HealthText.text =
-            "OYUNCU 1 - CAN: " +
-            player1Health;
+        if (player1HealthText != null)
+        {
+            player1HealthText.text =
+                "OYUNCU 1 - CAN: " +
+                player1Health;
+        }
 
-        player2HealthText.text =
-            "OYUNCU 2 - CAN: " +
-            player2Health;
+        if (player2HealthText != null)
+        {
+            player2HealthText.text =
+                "OYUNCU 2 - CAN: " +
+                player2Health;
+        }
+
+        if (player1HPBar != null)
+        {
+            player1HPBar.value =
+                player1Health;
+        }
+
+        if (player2HPBar != null)
+        {
+            player2HPBar.value =
+                player2Health;
+        }
+
+        if (player1HPText != null)
+        {
+            player1HPText.text =
+                player1Health +
+                " / " +
+                maxHealth;
+        }
+
+        if (player2HPText != null)
+        {
+            player2HPText.text =
+                player2Health +
+                " / " +
+                maxHealth;
+        }
 
         if (gameOver)
         {

@@ -15,9 +15,9 @@ MonoBehaviour:
   cardId: sign_002
   displayName: "Arkada\u015F"
   modelLabel: Arkadas
-  cardType: 1
+  cardType: 0
   difficulty: 2
-  basePower: 9
+  basePower: 30
   movementType: 0
   handType: 0
   cardImage: {fileID: 0}
