@@ -15,9 +15,9 @@ MonoBehaviour:
   cardId: sign_012
   displayName: "\xD6z\xFCr Dilemek"
   modelLabel: Ozur-Dilemek
-  cardType: 1
+  cardType: 0
   difficulty: 3
-  basePower: 12
+  basePower: 40
   movementType: 0
   handType: 0
   cardImage: {fileID: 0}

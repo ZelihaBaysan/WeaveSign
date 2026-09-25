@@ -34,14 +34,16 @@ public class WordLearningController : MonoBehaviour
 
         if (wordItems == null || wordItems.Length == 0)
         {
-            Debug.LogError("Kelime LearningItemData bulunamadı!");
+            Debug.LogError(
+                "Kelime LearningItemData bulunamadı!"
+            );
+
             return;
         }
 
         GenerateWordButtons();
         UpdateWordDisplay();
 
-        // Kelime seçim ekranını tamamen opak yap.
         Image panelImage =
             wordSelectionPanel.GetComponent<Image>();
 
@@ -128,6 +130,7 @@ public class WordLearningController : MonoBehaviour
         if (currentItem.signImage != null)
         {
             signImage.enabled = true;
+
             signImage.sprite =
                 currentItem.signImage;
 
@@ -260,10 +263,16 @@ public class WordLearningController : MonoBehaviour
 
         if (!resultReceived)
         {
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlayMistake();
+            }
+
             feedbackText.text =
                 "SONUÇ ALINAMADI";
 
             recognitionInProgress = false;
+
             yield break;
         }
 
@@ -282,6 +291,11 @@ public class WordLearningController : MonoBehaviour
 
         if (success)
         {
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlaySuccess();
+            }
+
             feedbackText.text =
                 "BAŞARILI!" +
                 "\nSKOR: %" +
@@ -289,6 +303,11 @@ public class WordLearningController : MonoBehaviour
         }
         else
         {
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlayMistake();
+            }
+
             feedbackText.text =
                 "TEKRAR DENE" +
                 "\nTAHMİN: " +

@@ -17,7 +17,7 @@ MonoBehaviour:
   modelLabel: Dur
   cardType: 0
   difficulty: 1
-  basePower: 10
+  basePower: 20
   movementType: 0
   handType: 0
   cardImage: {fileID: 0}

@@ -43,22 +43,24 @@ public class CardAssetGenerator
     {
         CardConfig[] configs =
         {
+            // 5 HEAL
+
             new CardConfig(
                 "sign_001",
                 "Anne",
                 "Anne",
                 CardType.Heal,
                 1,
-                6
+                10
             ),
 
             new CardConfig(
                 "sign_002",
                 "Arkadaş",
                 "Arkadas",
-                CardType.Heal,
+                CardType.Attack,
                 2,
-                9
+                30
             ),
 
             new CardConfig(
@@ -67,7 +69,7 @@ public class CardAssetGenerator
                 "Baba",
                 CardType.Heal,
                 1,
-                6
+                10
             ),
 
             new CardConfig(
@@ -76,16 +78,16 @@ public class CardAssetGenerator
                 "Dur",
                 CardType.Attack,
                 1,
-                10
+                20
             ),
 
             new CardConfig(
                 "sign_005",
                 "Ev",
                 "Ev",
-                CardType.Heal,
+                CardType.Attack,
                 1,
-                6
+                20
             ),
 
             new CardConfig(
@@ -94,7 +96,7 @@ public class CardAssetGenerator
                 "Evet",
                 CardType.Attack,
                 1,
-                10
+                20
             ),
 
             new CardConfig(
@@ -103,7 +105,7 @@ public class CardAssetGenerator
                 "Hayir",
                 CardType.Attack,
                 2,
-                15
+                30
             ),
 
             new CardConfig(
@@ -112,16 +114,16 @@ public class CardAssetGenerator
                 "Kardes",
                 CardType.Heal,
                 2,
-                9
+                15
             ),
 
             new CardConfig(
                 "sign_009",
                 "Merhaba",
                 "Merhaba",
-                CardType.Heal,
+                CardType.Attack,
                 1,
-                6
+                20
             ),
 
             new CardConfig(
@@ -130,7 +132,7 @@ public class CardAssetGenerator
                 "Nasil",
                 CardType.Attack,
                 2,
-                15
+                30
             ),
 
             new CardConfig(
@@ -139,16 +141,16 @@ public class CardAssetGenerator
                 "Nerede",
                 CardType.Attack,
                 2,
-                15
+                30
             ),
 
             new CardConfig(
                 "sign_012",
                 "Özür Dilemek",
                 "Ozur-Dilemek",
-                CardType.Heal,
+                CardType.Attack,
                 3,
-                12
+                40
             ),
 
             new CardConfig(
@@ -157,7 +159,7 @@ public class CardAssetGenerator
                 "Tamam",
                 CardType.Attack,
                 1,
-                10
+                20
             ),
 
             new CardConfig(
@@ -166,7 +168,7 @@ public class CardAssetGenerator
                 "Telefon",
                 CardType.Attack,
                 3,
-                20
+                40
             ),
 
             new CardConfig(
@@ -175,7 +177,7 @@ public class CardAssetGenerator
                 "Tesekkurler",
                 CardType.Heal,
                 2,
-                9
+                15
             ),
 
             new CardConfig(
@@ -184,25 +186,25 @@ public class CardAssetGenerator
                 "Tuvalet",
                 CardType.Attack,
                 3,
-                20
+                40
             ),
 
             new CardConfig(
                 "sign_017",
                 "Yemek",
                 "Yemek",
-                CardType.Heal,
+                CardType.Attack,
                 3,
-                12
+                40
             ),
 
             new CardConfig(
                 "sign_018",
                 "İçmek",
                 "icmek",
-                CardType.Heal,
+                CardType.Attack,
                 3,
-                12
+                40
             ),
 
             new CardConfig(
@@ -211,7 +213,7 @@ public class CardAssetGenerator
                 "iyi",
                 CardType.Heal,
                 1,
-                6
+                10
             ),
 
             new CardConfig(
@@ -220,7 +222,7 @@ public class CardAssetGenerator
                 "kotu",
                 CardType.Attack,
                 3,
-                20
+                40
             )
         };
 
@@ -319,7 +321,8 @@ public class CardAssetGenerator
         AssetDatabase.Refresh();
 
         Debug.Log(
-            "20 düello kartı güncellendi!"
+            "20 düello kartı güncellendi! " +
+            "15 Attack / 5 Heal"
         );
     }
 }
