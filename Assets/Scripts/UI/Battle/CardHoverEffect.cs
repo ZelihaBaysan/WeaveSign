@@ -72,13 +72,14 @@ namespace WeaveSign.UI.Battle
         public void OnPointerEnter(PointerEventData eventData)
         {
             if (isHovered) return;
+            if (IsModalOrOverlayActive()) return;
             isHovered = true;
 
-            // Sibling değiştirmek yerine Canvas sortingOrder ile en öne çıkar
+            // Sibling değiştirmek yerine Canvas sortingOrder ile öne çıkar (Overlay/Settings 200'ün altında kalacak şekilde 10)
             if (cardCanvas != null)
             {
                 cardCanvas.overrideSorting = true;
-                cardCanvas.sortingOrder = 30;
+                cardCanvas.sortingOrder = 10;
             }
 
             // O anki Y pozisyonunu baz al (asla X'e dokunma!)
@@ -99,6 +100,46 @@ namespace WeaveSign.UI.Battle
                     cardCanvas.overrideSorting = false;
                 }
             });
+        }
+
+        private void Update()
+        {
+            if (isHovered && IsModalOrOverlayActive())
+            {
+                ForceReset();
+            }
+        }
+
+        public void ForceReset()
+        {
+            if (!isHovered) return;
+            isHovered = false;
+
+            if (activeRoutine != null)
+            {
+                StopCoroutine(activeRoutine);
+                activeRoutine = null;
+            }
+
+            rectTransform.localScale = baseScale;
+            Vector3 currentPos = rectTransform.localPosition;
+            currentPos.y = baseLocalY;
+            rectTransform.localPosition = currentPos;
+
+            if (cardCanvas != null)
+            {
+                cardCanvas.overrideSorting = false;
+            }
+        }
+
+        private bool IsModalOrOverlayActive()
+        {
+            SettingsPanelController settings = FindAnyObjectByType<SettingsPanelController>();
+            if (settings != null && settings.settingsPanel != null && settings.settingsPanel.activeInHierarchy)
+            {
+                return true;
+            }
+            return false;
         }
 
         private void StartAnimation(float targetProgress, System.Action onComplete = null)
