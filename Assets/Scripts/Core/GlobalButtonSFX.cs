@@ -42,8 +42,7 @@ public class GlobalButtonSFX : MonoBehaviour
     {
         Button[] buttons =
             Object.FindObjectsByType<Button>(
-                FindObjectsInactive.Include,
-                FindObjectsSortMode.None
+                FindObjectsInactive.Include
             );
 
         foreach (Button button in buttons)
