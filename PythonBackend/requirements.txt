@@ -1,0 +1,11 @@
+mediapipe
+opencv-python
+numpy
+pandas
+scikit-learn
+joblib
+PyYAML
+matplotlib
+fastapi
+uvicorn
+requests
