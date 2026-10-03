@@ -275,17 +275,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8aaaae514, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RawImage
-  m_Material: {fileID: 0}
-  m_Color: {r: 0.12, g: 0.08, b: 0.18, a: 1}
-  m_RaycastTarget: 0
-  m_Maskable: 1
-  m_Texture: {fileID: 0}
-  m_UVRect:
-    serializedVersion: 2
-    x: 0
-    y: 0
-    width: 1
-    height: 1
 --- !u!1 &9000018
 GameObject:
   m_ObjectHideFlags: 0
@@ -334,22 +323,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4688fdb7825415d95b73984ded3b7f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: TMPro::TMPro.TextMeshProUGUI
-  m_Material: {fileID: 0}
-  m_RaycastTarget: 0
-  m_Maskable: 1
-  m_text: "SEN\u0130N HAREKET\u0130N"
-  m_isRightToLeft: 0
-  m_fontStyle: 1
-  m_fontSize: 16
-  m_fontSizeBase: 16
-  m_fontColor: {r: 0.18, g: 0.23, b: 0.32, a: 1}
-  m_enableVertexGradient: 0
-  m_alignment: 514
-  m_enableWordWrapping: 0
-  m_overflowMode: 0
-  m_isOrthographic: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
 --- !u!1 &9000021
 GameObject:
   m_ObjectHideFlags: 0
@@ -473,23 +446,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4688fdb7825415d95b73984ded3b7f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: TMPro::TMPro.TextMeshProUGUI
-  m_Material: {fileID: 0}
-  m_RaycastTarget: 0
-  m_Maskable: 1
-  m_text: "HEDEF \u0130\u015EARET"
-  m_isRightToLeft: 0
-  m_fontStyle: 1
-  m_fontSize: 16
-  m_fontSizeBase: 16
-  m_fontColor: {r: 0.18, g: 0.23, b: 0.32, a: 1}
-  m_enableVertexGradient: 0
-  m_alignment: 514
-  m_enableWordWrapping: 0
-  m_overflowMode: 0
-  m_isOrthographic: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2100000, guid: a2441688fdd09be48a4eb25af4a2f36c, type: 2}
 --- !u!1 &9000033
 GameObject:
   m_ObjectHideFlags: 0
@@ -3782,7 +3738,6 @@ GameObject:
   - component: {fileID: 1860542488}
   - component: {fileID: 1860542487}
   - component: {fileID: 1860542490}
-  - component: {fileID: 1860542489}
   m_Layer: 0
   m_Name: RecognitionService
   m_TagString: Untagged
@@ -3817,20 +3772,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1860542489
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1860542486}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 288d0e7841726094a933d430695157c8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::YarenRecognitionService
-  apiUrl: http://127.0.0.1:8000/recognize
-  webcamCapture: {fileID: 1860542490}
 --- !u!114 &1860542490
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3854,6 +3795,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1916413566}
   - component: {fileID: 1916413565}
+  - component: {fileID: 1916413567}
   m_Layer: 0
   m_Name: LetterLearningManager
   m_TagString: Untagged
@@ -3880,7 +3822,7 @@ MonoBehaviour:
   letterSelectionPanel: {fileID: 1842254698}
   letterGrid: {fileID: 1004477817}
   letterButtonPrefab: {fileID: 8592131515569288738, guid: 54102688d78146a42ba37ac05d871033, type: 3}
-  recognitionService: {fileID: 1860542487}
+  recognitionService: {fileID: 1916413567}
   minimumSuccessScore: 70
 --- !u!4 &1916413566
 Transform:
@@ -3897,6 +3839,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1916413567
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1916413564}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 288d0e7841726094a933d430695157c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::YarenRecognitionService
+  apiUrl: http://127.0.0.1:8000/recognize
+  webcamCapture: {fileID: 1860542490}
 --- !u!1 &1957053196
 GameObject:
   m_ObjectHideFlags: 0
