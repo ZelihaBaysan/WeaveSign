@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,7 +7,25 @@ public class WebcamCapture : MonoBehaviour
     [SerializeField]
     private RawImage preview;
 
-    private WebCamTexture webcamTexture;
+    // Kamera sahne deðiþse bile yaþamaya devam edecek.
+    private static WebCamTexture sharedWebcamTexture;
+
+
+    [RuntimeInitializeOnLoadMethod(
+        RuntimeInitializeLoadType.SubsystemRegistration
+    )]
+    private static void ResetStaticCamera()
+    {
+        if (sharedWebcamTexture != null)
+        {
+            if (sharedWebcamTexture.isPlaying)
+            {
+                sharedWebcamTexture.Stop();
+            }
+
+            sharedWebcamTexture = null;
+        }
+    }
 
 
     private void Start()
@@ -17,75 +36,134 @@ public class WebcamCapture : MonoBehaviour
 
     public void StartCamera()
     {
-        if (webcamTexture != null)
+        // Daha önce kamera oluþturulmadýysa oluþtur.
+        if (sharedWebcamTexture == null)
         {
-            if (!webcamTexture.isPlaying)
+            WebCamDevice[] devices =
+                WebCamTexture.devices;
+
+            if (devices.Length == 0)
             {
-                webcamTexture.Play();
+                Debug.LogError(
+                    "Kamera bulunamadi."
+                );
+
+                return;
             }
 
-            if (preview != null)
+            sharedWebcamTexture =
+                new WebCamTexture(
+                    devices[0].name,
+                    640,
+                    480,
+                    30
+                );
+
+            sharedWebcamTexture.Play();
+
+            Debug.Log(
+                "Kamera baslatildi: " +
+                devices[0].name
+            );
+        }
+        else
+        {
+            // Sahne deðiþiminden sonra kamera durmuþsa
+            // tekrar baþlat.
+            if (!sharedWebcamTexture.isPlaying)
             {
-                preview.texture = webcamTexture;
+                sharedWebcamTexture.Play();
+
+                Debug.Log(
+                    "Mevcut kamera tekrar baslatildi."
+                );
             }
+        }
+
+
+        // Her yeni sahnede o sahnenin CameraPreview'una
+        // kamerayý yeniden baðla.
+        BindPreview();
+    }
+
+
+    private void BindPreview()
+    {
+        if (preview == null)
+        {
+            Debug.LogWarning(
+                "CameraPreview baglanmamis."
+            );
 
             return;
         }
 
-        webcamTexture = new WebCamTexture();
+        preview.texture =
+            sharedWebcamTexture;
 
-        webcamTexture.Play();
+        preview.enabled = true;
 
-        if (preview != null)
-        {
-            preview.texture = webcamTexture;
-        }
+        Debug.Log(
+            "Kamera yeni CameraPreview nesnesine baglandi."
+        );
     }
 
 
-    public void StopCamera()
+    public bool IsCameraReady()
     {
-        if (
-            webcamTexture != null &&
-            webcamTexture.isPlaying
-        )
-        {
-            webcamTexture.Stop();
-        }
+        return
+            sharedWebcamTexture != null &&
+            sharedWebcamTexture.isPlaying &&
+            sharedWebcamTexture.width > 16 &&
+            sharedWebcamTexture.height > 16;
     }
 
 
     public string GetFrameBase64()
     {
         if (
-            webcamTexture == null ||
-            !webcamTexture.isPlaying ||
-            webcamTexture.width <= 16
+            sharedWebcamTexture == null ||
+            !sharedWebcamTexture.isPlaying
         )
         {
+            StartCamera();
+        }
+
+
+        if (!IsCameraReady())
+        {
+            Debug.LogWarning(
+                "Kamera henuz hazir degil."
+            );
+
             return null;
         }
 
+
         Texture2D frame =
             new Texture2D(
-                webcamTexture.width,
-                webcamTexture.height,
+                sharedWebcamTexture.width,
+                sharedWebcamTexture.height,
                 TextureFormat.RGB24,
                 false
             );
 
+
         frame.SetPixels(
-            webcamTexture.GetPixels()
+            sharedWebcamTexture.GetPixels()
         );
 
         frame.Apply();
 
+
         byte[] jpgBytes =
             frame.EncodeToJPG(75);
 
+
         Destroy(frame);
 
-        return System.Convert.ToBase64String(
+
+        return Convert.ToBase64String(
             jpgBytes
         );
     }
@@ -93,12 +171,26 @@ public class WebcamCapture : MonoBehaviour
 
     public WebCamTexture GetTexture()
     {
-        return webcamTexture;
+        return sharedWebcamTexture;
     }
 
 
-    private void OnDestroy()
+    // DÝKKAT:
+    // Artýk OnDestroy içinde kamerayý durdurmuyoruz.
+    // Çünkü sahne deðiþirken bu obje yok oluyor,
+    // ama kamerayý sonraki sahnede kullanmaya devam edeceðiz.
+
+
+    private void OnApplicationQuit()
     {
-        StopCamera();
+        if (
+            sharedWebcamTexture != null &&
+            sharedWebcamTexture.isPlaying
+        )
+        {
+            sharedWebcamTexture.Stop();
+        }
+
+        sharedWebcamTexture = null;
     }
 }

@@ -25,7 +25,6 @@ public class WordLearningController : MonoBehaviour
 
     private LearningItemData[] wordItems;
     private int currentIndex = 0;
-
     private bool recognitionInProgress = false;
 
     void Start()
@@ -34,18 +33,14 @@ public class WordLearningController : MonoBehaviour
 
         if (wordItems == null || wordItems.Length == 0)
         {
-            Debug.LogError(
-                "Kelime LearningItemData bulunamadı!"
-            );
-
+            Debug.LogError("Kelime LearningItemData bulunamadı!");
             return;
         }
 
         GenerateWordButtons();
         UpdateWordDisplay();
 
-        Image panelImage =
-            wordSelectionPanel.GetComponent<Image>();
+        Image panelImage = wordSelectionPanel.GetComponent<Image>();
 
         if (panelImage != null)
         {
@@ -64,17 +59,11 @@ public class WordLearningController : MonoBehaviour
 
     void LoadWordData()
     {
-        wordItems =
-            Resources.LoadAll<LearningItemData>(
-                "Learning/Words"
-            )
+        wordItems = Resources.LoadAll<LearningItemData>("Learning/Words")
             .OrderBy(item => item.name)
             .ToArray();
 
-        Debug.Log(
-            "Yüklenen kelime sayısı: " +
-            wordItems.Length
-        );
+        Debug.Log("Yüklenen kelime sayısı: " + wordItems.Length);
     }
 
     void GenerateWordButtons()
@@ -83,15 +72,13 @@ public class WordLearningController : MonoBehaviour
         {
             int index = i;
 
-            GameObject newButton =
-                Instantiate(
-                    wordButtonPrefab,
-                    wordGrid
-                );
+            GameObject newButton = Instantiate(
+                wordButtonPrefab,
+                wordGrid
+            );
 
             newButton.name =
-                "WordButton_" +
-                wordItems[i].displayName;
+                "WordButton_" + wordItems[i].displayName;
 
             TMP_Text buttonText =
                 newButton.GetComponentInChildren<TMP_Text>();
@@ -127,24 +114,95 @@ public class WordLearningController : MonoBehaviour
             " / " +
             wordItems.Length;
 
-        if (currentItem.signImage != null)
+        Sprite loadedSprite =
+            GetWordSignSprite(currentItem);
+
+        if (loadedSprite != null)
         {
             signImage.enabled = true;
-
-            signImage.sprite =
-                currentItem.signImage;
-
+            signImage.sprite = loadedSprite;
             signImage.preserveAspect = true;
         }
         else
         {
             signImage.enabled = false;
+
+            Debug.LogWarning(
+                "Kelime için görsel bulunamadı: " +
+                currentItem.displayName
+            );
         }
 
         if (feedbackText != null)
         {
             feedbackText.text = "";
         }
+    }
+
+    Sprite GetWordSignSprite(
+        LearningItemData item
+    )
+    {
+        string displayNamePath =
+            "WordSigns/" +
+            NormalizeFileName(item.displayName);
+
+        Sprite sprite =
+            Resources.Load<Sprite>(
+                displayNamePath
+            );
+
+        if (sprite != null)
+        {
+            Debug.Log(
+                "Kelime görseli bulundu: " +
+                displayNamePath
+            );
+
+            return sprite;
+        }
+
+        string labelPath =
+            "WordSigns/" +
+            NormalizeFileName(item.modelLabel);
+
+        sprite =
+            Resources.Load<Sprite>(
+                labelPath
+            );
+
+        if (sprite != null)
+        {
+            return sprite;
+        }
+
+        if (item.signImage != null)
+        {
+            return item.signImage;
+        }
+
+        return null;
+    }
+
+    string NormalizeFileName(
+        string text
+    )
+    {
+        if (string.IsNullOrEmpty(text))
+            return "";
+
+        text = text.ToLowerInvariant();
+
+        text = text.Replace("ç", "c");
+        text = text.Replace("ğ", "g");
+        text = text.Replace("ı", "i");
+        text = text.Replace("ö", "o");
+        text = text.Replace("ş", "s");
+        text = text.Replace("ü", "u");
+
+        text = text.Replace(" ", "_");
+
+        return text;
     }
 
     public void NextWord()
@@ -194,7 +252,9 @@ public class WordLearningController : MonoBehaviour
         wordSelectionPanel.SetActive(false);
     }
 
-    public void SelectWord(int index)
+    public void SelectWord(
+        int index
+    )
     {
         if (
             recognitionInProgress ||
@@ -248,6 +308,7 @@ public class WordLearningController : MonoBehaviour
             );
 
         RecognitionResult result = default;
+
         bool resultReceived = false;
 
         yield return StartCoroutine(
@@ -255,23 +316,30 @@ public class WordLearningController : MonoBehaviour
                 request,
                 recognitionResult =>
                 {
-                    result = recognitionResult;
-                    resultReceived = true;
+                    result =
+                        recognitionResult;
+
+                    resultReceived =
+                        true;
                 }
             )
         );
 
         if (!resultReceived)
         {
-            if (AudioManager.Instance != null)
+            if (
+                AudioManager.Instance != null
+            )
             {
-                AudioManager.Instance.PlayMistake();
+                AudioManager.Instance
+                    .PlayMistake();
             }
 
             feedbackText.text =
                 "SONUÇ ALINAMADI";
 
-            recognitionInProgress = false;
+            recognitionInProgress =
+                false;
 
             yield break;
         }
@@ -291,9 +359,12 @@ public class WordLearningController : MonoBehaviour
 
         if (success)
         {
-            if (AudioManager.Instance != null)
+            if (
+                AudioManager.Instance != null
+            )
             {
-                AudioManager.Instance.PlaySuccess();
+                AudioManager.Instance
+                    .PlaySuccess();
             }
 
             feedbackText.text =
@@ -303,9 +374,12 @@ public class WordLearningController : MonoBehaviour
         }
         else
         {
-            if (AudioManager.Instance != null)
+            if (
+                AudioManager.Instance != null
+            )
             {
-                AudioManager.Instance.PlayMistake();
+                AudioManager.Instance
+                    .PlayMistake();
             }
 
             feedbackText.text =

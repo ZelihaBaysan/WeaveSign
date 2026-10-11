@@ -34,18 +34,14 @@ public class LetterLearningController : MonoBehaviour
 
         if (letterItems == null || letterItems.Length == 0)
         {
-            Debug.LogError(
-                "Harf LearningItemData bulunamadı!"
-            );
-
+            Debug.LogError("Harf LearningItemData bulunamadı!");
             return;
         }
 
         GenerateLetterButtons();
         UpdateLetterDisplay();
 
-        Image panelImage =
-            letterSelectionPanel.GetComponent<Image>();
+        Image panelImage = letterSelectionPanel.GetComponent<Image>();
 
         if (panelImage != null)
         {
@@ -65,9 +61,7 @@ public class LetterLearningController : MonoBehaviour
     void LoadLetterData()
     {
         letterItems =
-            Resources.LoadAll<LearningItemData>(
-                "Learning/Letters"
-            )
+            Resources.LoadAll<LearningItemData>("Learning/Letters")
             .OrderBy(item => item.name)
             .ToArray();
 
@@ -127,23 +121,99 @@ public class LetterLearningController : MonoBehaviour
             " / " +
             letterItems.Length;
 
-        if (currentItem.signImage != null)
+        Sprite loadedSprite =
+            GetLetterSignSprite(currentItem);
+
+        if (loadedSprite != null)
         {
             signImage.enabled = true;
-
-            signImage.sprite =
-                currentItem.signImage;
-
+            signImage.sprite = loadedSprite;
             signImage.preserveAspect = true;
         }
         else
         {
             signImage.enabled = false;
+
+            Debug.LogWarning(
+                "Harf için görsel bulunamadı: " +
+                currentItem.displayName
+            );
         }
 
         if (feedbackText != null)
         {
             feedbackText.text = "";
+        }
+    }
+
+    Sprite GetLetterSignSprite(
+        LearningItemData item
+    )
+    {
+        string fileName =
+            NormalizeLetterFileName(
+                item.displayName
+            );
+
+        string path =
+            "LetterSigns/" + fileName;
+
+        Sprite sprite =
+            Resources.Load<Sprite>(path);
+
+        if (sprite != null)
+        {
+            Debug.Log(
+                "Harf görseli bulundu: " +
+                path
+            );
+
+            return sprite;
+        }
+
+        if (item.signImage != null)
+        {
+            return item.signImage;
+        }
+
+        return null;
+    }
+
+    string NormalizeLetterFileName(
+        string text
+    )
+    {
+        if (string.IsNullOrEmpty(text))
+            return "";
+
+        string letter =
+            text.Trim().ToUpperInvariant();
+
+        switch (letter)
+        {
+            case "Ç":
+                return "ch";
+
+            case "Ğ":
+                return "gh";
+
+            case "İ":
+                return "ii";
+
+            case "Ö":
+                return "oe";
+
+            case "Ş":
+                return "sh";
+
+            case "Ü":
+                return "ue";
+
+            case "I":
+                return "i";
+
+            default:
+                return letter.ToLowerInvariant();
         }
     }
 
@@ -256,23 +326,30 @@ public class LetterLearningController : MonoBehaviour
                 request,
                 recognitionResult =>
                 {
-                    result = recognitionResult;
-                    resultReceived = true;
+                    result =
+                        recognitionResult;
+
+                    resultReceived =
+                        true;
                 }
             )
         );
 
         if (!resultReceived)
         {
-            if (AudioManager.Instance != null)
+            if (
+                AudioManager.Instance != null
+            )
             {
-                AudioManager.Instance.PlayMistake();
+                AudioManager.Instance
+                    .PlayMistake();
             }
 
             feedbackText.text =
                 "SONUÇ ALINAMADI";
 
-            recognitionInProgress = false;
+            recognitionInProgress =
+                false;
 
             yield break;
         }
@@ -292,9 +369,12 @@ public class LetterLearningController : MonoBehaviour
 
         if (success)
         {
-            if (AudioManager.Instance != null)
+            if (
+                AudioManager.Instance != null
+            )
             {
-                AudioManager.Instance.PlaySuccess();
+                AudioManager.Instance
+                    .PlaySuccess();
             }
 
             feedbackText.text =
@@ -304,9 +384,12 @@ public class LetterLearningController : MonoBehaviour
         }
         else
         {
-            if (AudioManager.Instance != null)
+            if (
+                AudioManager.Instance != null
+            )
             {
-                AudioManager.Instance.PlayMistake();
+                AudioManager.Instance
+                    .PlayMistake();
             }
 
             feedbackText.text =
