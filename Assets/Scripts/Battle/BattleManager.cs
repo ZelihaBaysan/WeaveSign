@@ -226,32 +226,22 @@ public class BattleManager : MonoBehaviour
             result.predictedLabel ==
             selectedCard.modelLabel;
 
+        Debug.Log(
+            "BATTLE AI -> Hedef: " +
+            selectedCard.modelLabel +
+            " | Tahmin: " +
+            result.predictedLabel +
+            " | Skor: %" +
+            score
+        );
+
         bool failed =
             !correctPrediction ||
             score < 50;
 
-        float powerMultiplier = 0f;
-
-        if (!failed && score < 70)
-        {
-            powerMultiplier = 0.50f;
-        }
-        else if (!failed && score < 85)
-        {
-            powerMultiplier = 0.75f;
-        }
-        else if (!failed && score < 95)
-        {
-            powerMultiplier = 1.00f;
-        }
-        else if (!failed)
-        {
-            powerMultiplier = 1.10f;
-        }
-
         if (failed)
         {
-            ApplyFailurePenalty(
+            ApplyFailure(
                 result,
                 score
             );
@@ -261,7 +251,7 @@ public class BattleManager : MonoBehaviour
             int finalPower =
                 Mathf.RoundToInt(
                     selectedCard.basePower *
-                    powerMultiplier
+                    result.confidence
                 );
 
             if (
@@ -291,7 +281,6 @@ public class BattleManager : MonoBehaviour
                 BattleState.GameOver
             );
 
-            // Zafer sesi
             if (AudioManager.Instance != null)
             {
                 AudioManager.Instance.PlayVictory();
@@ -315,34 +304,14 @@ public class BattleManager : MonoBehaviour
         );
     }
 
-    void ApplyFailurePenalty(
+    void ApplyFailure(
         RecognitionResult result,
         int score
     )
     {
-        // Yanlış / başarısız sesi
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.PlayMistake();
-        }
-
-        if (currentPlayer == 1)
-        {
-            player1Health =
-                Mathf.Clamp(
-                    player1Health - 5,
-                    0,
-                    maxHealth
-                );
-        }
-        else
-        {
-            player2Health =
-                Mathf.Clamp(
-                    player2Health - 5,
-                    0,
-                    maxHealth
-                );
         }
 
         battleStatusText.text =
@@ -350,8 +319,7 @@ public class BattleManager : MonoBehaviour
             "\nTAHMİN: " +
             result.predictedLabel +
             "\nSKOR: %" +
-            score +
-            "\n-5 CAN";
+            score;
     }
 
     void ApplyAttack(
@@ -359,7 +327,6 @@ public class BattleManager : MonoBehaviour
         int score
     )
     {
-        // Saldırı sesi
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.PlayAttack();
@@ -409,7 +376,6 @@ public class BattleManager : MonoBehaviour
         int score
     )
     {
-        // Heal sesi
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.PlayHeal();
@@ -488,9 +454,13 @@ public class BattleManager : MonoBehaviour
     void ChangeTurn()
     {
         if (currentPlayer == 1)
+        {
             currentPlayer = 2;
+        }
         else
+        {
             currentPlayer = 1;
+        }
     }
 
     void CheckGameOver()
