@@ -18,12 +18,21 @@ public class YarenRecognitionService : RecognitionServiceBase
     private TMP_Text countdownText;
 
 
+    // GRU kelime modeli için
+    private const int WORD_SEQUENCE_LENGTH = 30;
+
+
     [Serializable]
     private class ApiRequest
     {
         public string modelType;
         public string expectedLabel;
+
+        // Harf modeli için
         public string imageBase64;
+
+        // GRU kelime modeli için
+        public string[] framesBase64;
     }
 
 
@@ -40,6 +49,10 @@ public class YarenRecognitionService : RecognitionServiceBase
         Action<RecognitionResult> onResult
     )
     {
+        // =================================================
+        // KAMERA KONTROLÜ
+        // =================================================
+
         if (webcamCapture == null)
         {
             Debug.LogError(
@@ -85,9 +98,9 @@ public class YarenRecognitionService : RecognitionServiceBase
         }
 
 
-        // ----------------------------
+        // =================================================
         // GERİ SAYIM
-        // ----------------------------
+        // =================================================
 
         SetCountdownText("3");
         yield return new WaitForSeconds(1f);
@@ -99,34 +112,11 @@ public class YarenRecognitionService : RecognitionServiceBase
         yield return new WaitForSeconds(1f);
 
         SetCountdownText("İŞARETİ YAP!");
-        yield return new WaitForSeconds(1f);
 
 
-        // Geri sayımdan sonra görüntüyü al
-        string imageBase64 =
-            webcamCapture.GetFrameBase64();
-
-
-        if (string.IsNullOrEmpty(imageBase64))
-        {
-            SetCountdownText("");
-
-            Debug.LogError(
-                "Kameradan goruntu alinamadi."
-            );
-
-            onResult?.Invoke(
-                new RecognitionResult("", 0f)
-            );
-
-            yield break;
-        }
-
-
-        SetCountdownText(
-            "TAHMİN EDİLİYOR..."
-        );
-
+        // =================================================
+        // API REQUEST
+        // =================================================
 
         ApiRequest apiRequest =
             new ApiRequest();
@@ -137,12 +127,173 @@ public class YarenRecognitionService : RecognitionServiceBase
         apiRequest.expectedLabel =
             request.expectedLabel;
 
-        apiRequest.imageBase64 =
-            imageBase64;
+
+        // =================================================
+        // KELİME -> 30 KARE
+        // =================================================
+
+        if (
+            request.modelType ==
+            RecognitionModelType.Word
+        )
+        {
+            Debug.Log(
+                "GRU kelime modeli icin "
+                + WORD_SEQUENCE_LENGTH
+                + " kare toplanacak."
+            );
+
+
+            string[] frames =
+                new string[
+                    WORD_SEQUENCE_LENGTH
+                ];
+
+
+            int collectedFrames = 0;
+            int attempts = 0;
+
+            // Kamera bazen bir kareyi boş verebilir.
+            // Bu yüzden 30 kare için en fazla 60 deneme.
+            int maxAttempts =
+                WORD_SEQUENCE_LENGTH * 2;
+
+
+            while (
+                collectedFrames <
+                WORD_SEQUENCE_LENGTH
+                &&
+                attempts < maxAttempts
+            )
+            {
+                attempts++;
+
+
+                string frameBase64 =
+                    webcamCapture
+                        .GetFrameBase64();
+
+
+                if (
+                    !string.IsNullOrEmpty(
+                        frameBase64
+                    )
+                )
+                {
+                    frames[
+                        collectedFrames
+                    ] = frameBase64;
+
+                    collectedFrames++;
+                }
+
+
+                // Yaklaşık 30 FPS
+                yield return new WaitForSeconds(
+                    0.033f
+                );
+            }
+
+
+            if (
+                collectedFrames !=
+                WORD_SEQUENCE_LENGTH
+            )
+            {
+                SetCountdownText("");
+
+                Debug.LogError(
+                    "30 kare toplanamadi. "
+                    + "Toplanan: "
+                    + collectedFrames
+                );
+
+                onResult?.Invoke(
+                    new RecognitionResult(
+                        "",
+                        0f
+                    )
+                );
+
+                yield break;
+            }
+
+
+            apiRequest.framesBase64 =
+                frames;
+
+            apiRequest.imageBase64 =
+                null;
+
+
+            Debug.Log(
+                "30 kare basariyla toplandi."
+            );
+        }
+
+
+        // =================================================
+        // HARF -> TEK KARE
+        // =================================================
+
+        else
+        {
+            // İşareti yapması için kısa süre
+            yield return new WaitForSeconds(
+                1.5f
+            );
+
+
+            string imageBase64 =
+                webcamCapture
+                    .GetFrameBase64();
+
+
+            if (
+                string.IsNullOrEmpty(
+                    imageBase64
+                )
+            )
+            {
+                SetCountdownText("");
+
+                Debug.LogError(
+                    "Kameradan goruntu "
+                    + "alinamadi."
+                );
+
+                onResult?.Invoke(
+                    new RecognitionResult(
+                        "",
+                        0f
+                    )
+                );
+
+                yield break;
+            }
+
+
+            apiRequest.imageBase64 =
+                imageBase64;
+
+            apiRequest.framesBase64 =
+                null;
+        }
+
+
+        // =================================================
+        // API'YE GÖNDER
+        // =================================================
+
+        SetCountdownText(
+            "TAHMİN EDİLİYOR..."
+        );
 
 
         string json =
-            JsonUtility.ToJson(apiRequest);
+            JsonUtility.ToJson(
+                apiRequest
+            );
 
 
         byte[] bodyRaw =
@@ -159,10 +310,13 @@ public class YarenRecognitionService : RecognitionServiceBase
         )
         {
             webRequest.uploadHandler =
-                new UploadHandlerRaw(bodyRaw);
+                new UploadHandlerRaw(
+                    bodyRaw
+                );
 
             webRequest.downloadHandler =
                 new DownloadHandlerBuffer();
+
 
             webRequest.SetRequestHeader(
                 "Content-Type",
@@ -174,6 +328,10 @@ public class YarenRecognitionService : RecognitionServiceBase
                 webRequest.SendWebRequest();
 
 
+            // =================================================
+            // API HATA KONTROLÜ
+            // =================================================
+
             if (
                 webRequest.result !=
                 UnityWebRequest.Result.Success
@@ -182,24 +340,39 @@ public class YarenRecognitionService : RecognitionServiceBase
                 SetCountdownText("");
 
                 Debug.LogError(
-                    "API hatasi: " +
-                    webRequest.error
+                    "API hatasi: "
+                    + webRequest.error
+                );
+
+                Debug.LogError(
+                    "API cevabi: "
+                    + webRequest
+                        .downloadHandler
+                        .text
                 );
 
                 onResult?.Invoke(
-                    new RecognitionResult("", 0f)
+                    new RecognitionResult(
+                        "",
+                        0f
+                    )
                 );
 
                 yield break;
             }
 
 
+            // =================================================
+            // API CEVABI
+            // =================================================
+
             ApiResponse response =
-                JsonUtility.FromJson<ApiResponse>(
-                    webRequest
-                        .downloadHandler
-                        .text
-                );
+                JsonUtility
+                    .FromJson<ApiResponse>(
+                        webRequest
+                            .downloadHandler
+                            .text
+                    );
 
 
             if (response == null)
@@ -211,7 +384,10 @@ public class YarenRecognitionService : RecognitionServiceBase
                 );
 
                 onResult?.Invoke(
-                    new RecognitionResult("", 0f)
+                    new RecognitionResult(
+                        "",
+                        0f
+                    )
                 );
 
                 yield break;
@@ -226,23 +402,24 @@ public class YarenRecognitionService : RecognitionServiceBase
 
 
             Debug.Log(
-                "YAREN MODEL -> Model: " +
-                request.modelType +
-                " | Tahmin: " +
-                result.predictedLabel +
-                " | Skor: %" +
-                Mathf.RoundToInt(
-                    result.confidence * 100f
+                "YAREN MODEL -> Model: "
+                + request.modelType
+                + " | Tahmin: "
+                + result.predictedLabel
+                + " | Skor: %"
+                + Mathf.RoundToInt(
+                    result.confidence
+                    * 100f
                 )
             );
 
 
-            // Controller kendi sonucu yazacağı için
-            // geri sayım metnini temizliyoruz.
             SetCountdownText("");
 
 
-            onResult?.Invoke(result);
+            onResult?.Invoke(
+                result
+            );
         }
     }
 
@@ -253,9 +430,12 @@ public class YarenRecognitionService : RecognitionServiceBase
     {
         if (countdownText != null)
         {
-            countdownText.text = message;
+            countdownText.text =
+                message;
         }
 
-        Debug.Log(message);
+        Debug.Log(
+            message
+        );
     }
 }
