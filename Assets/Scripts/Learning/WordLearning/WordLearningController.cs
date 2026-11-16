@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Linq;
 using UnityEngine;
@@ -10,6 +11,7 @@ public class WordLearningController : MonoBehaviour
     public TMP_Text wordText;
     public TMP_Text progressText;
     public TMP_Text feedbackText;
+    public TMP_Text signDescriptionText;
     public Image signImage;
 
     [Header("Kelime Seçim Paneli")]
@@ -27,20 +29,25 @@ public class WordLearningController : MonoBehaviour
     private int currentIndex = 0;
     private bool recognitionInProgress = false;
 
+
     void Start()
     {
         LoadWordData();
 
         if (wordItems == null || wordItems.Length == 0)
         {
-            Debug.LogError("Kelime LearningItemData bulunamadı!");
+            Debug.LogError(
+                "Kelime LearningItemData bulunamadı!"
+            );
+
             return;
         }
 
         GenerateWordButtons();
         UpdateWordDisplay();
 
-        Image panelImage = wordSelectionPanel.GetComponent<Image>();
+        Image panelImage =
+            wordSelectionPanel.GetComponent<Image>();
 
         if (panelImage != null)
         {
@@ -57,14 +64,22 @@ public class WordLearningController : MonoBehaviour
         }
     }
 
+
     void LoadWordData()
     {
-        wordItems = Resources.LoadAll<LearningItemData>("Learning/Words")
+        wordItems =
+            Resources.LoadAll<LearningItemData>(
+                "Learning/Words"
+            )
             .OrderBy(item => item.name)
             .ToArray();
 
-        Debug.Log("Yüklenen kelime sayısı: " + wordItems.Length);
+        Debug.Log(
+            "Yüklenen kelime sayısı: " +
+            wordItems.Length
+        );
     }
+
 
     void GenerateWordButtons()
     {
@@ -72,13 +87,15 @@ public class WordLearningController : MonoBehaviour
         {
             int index = i;
 
-            GameObject newButton = Instantiate(
-                wordButtonPrefab,
-                wordGrid
-            );
+            GameObject newButton =
+                Instantiate(
+                    wordButtonPrefab,
+                    wordGrid
+                );
 
             newButton.name =
-                "WordButton_" + wordItems[i].displayName;
+                "WordButton_" +
+                wordItems[i].displayName;
 
             TMP_Text buttonText =
                 newButton.GetComponentInChildren<TMP_Text>();
@@ -101,6 +118,7 @@ public class WordLearningController : MonoBehaviour
         }
     }
 
+
     void UpdateWordDisplay()
     {
         LearningItemData currentItem =
@@ -113,6 +131,24 @@ public class WordLearningController : MonoBehaviour
             (currentIndex + 1) +
             " / " +
             wordItems.Length;
+
+
+        // ==============================
+        // AÇIKLAMA
+        // ==============================
+
+        if (signDescriptionText != null)
+        {
+            signDescriptionText.text =
+                GetWordDescription(
+                    currentItem.displayName
+                );
+        }
+
+
+        // ==============================
+        // GÖRSEL
+        // ==============================
 
         Sprite loadedSprite =
             GetWordSignSprite(currentItem);
@@ -133,11 +169,118 @@ public class WordLearningController : MonoBehaviour
             );
         }
 
+
         if (feedbackText != null)
         {
             feedbackText.text = "";
         }
     }
+
+
+    // =====================================================
+    // KELİME AÇIKLAMALARI
+    // =====================================================
+
+    string GetWordDescription(
+        string word
+    )
+    {
+        string key =
+            NormalizeFileName(word);
+
+        switch (key)
+        {
+            case "anne":
+                return
+                    "Parmak uçları önce bir göğüs hizasına, ardından diğer göğüs hizasına getirilir.";
+
+            case "arkadas":
+                return
+                    "İki el karın hizasında tutulur ve eller iki kez birbirine vurulur.";
+
+            case "baba":
+                return
+                    "İki el göğüs hizasında tutulur; başparmak ve işaret parmakları birleşik şekilde yan yana getirilir.";
+
+            case "dur":
+                return
+                    "Avuç içi karşıya bakacak şekilde el önde ve dik tutulur.";
+
+            case "ev":
+                return
+                    "İki elin parmak uçları birleştirilerek çatı şekli oluşturulur.";
+
+            case "evet":
+                return
+                    "İki el göğüs hizasında, avuç içleri yukarı bakacak şekilde tutulur ve hafifçe aşağı indirilir.";
+
+            case "hayir":
+                return
+                    "İşaret parmağı açık tutulur ve el yatay yönde bir taraftan diğer tarafa hareket ettirilir.";
+
+            case "kardes":
+                return
+                    "İki el yumruk yapılır, serçe parmaklar açık tutulur ve aşağı-yukarı birbirine sürtülür.";
+
+            case "merhaba":
+                return
+                    "El açık ve düz şekilde baş hizasına getirilerek işaret yapılır.";
+
+            case "nasil":
+                return
+                    "İki el göğüs hizasında tutulur ve avuç içleri aşağıdan yukarı doğru çevrilir.";
+
+            case "nerede":
+                return
+                    "İki elin işaret parmakları aşağı bakacak şekilde tutulur ve eller aşağı yönde hareket ettirilir.";
+
+            case "ozur_dilemek":
+            case "ozur-dilemek":
+                return
+                    "İki el göğüs hizasında birleştirilerek görseldeki pozisyon uygulanır.";
+
+            case "tamam":
+                return
+                    "İki el göğüs hizasında açık tutulur ve eller iki yana doğru açılır.";
+
+            case "telefon":
+                return
+                    "Başparmak ve serçe parmak açık tutulur, el telefon tutar gibi yüz hizasına getirilir.";
+
+            case "tesekkurler":
+                return
+                    "Bir elin işaret parmağı dik tutulur, diğer elin işaret parmağı üzerine yatay şekilde yerleştirilir.";
+
+            case "tuvalet":
+                return
+                    "Başparmak ve işaret parmağı halka oluşturacak şekilde birleştirilir, diğer parmaklar açık tutulur.";
+
+            case "yemek":
+                return
+                    "Parmak uçları birleştirilir ve el ağız hizasına getirilir.";
+
+            case "icmek":
+                return
+                    "Başparmak açık tutulur ve el ağız hizasına getirilerek içme hareketi yapılır.";
+
+            case "iyi":
+                return
+                    "Parmak uçları birleşik ve yukarı bakacak şekilde el göğüs hizasında tutulur, bilekten aşağı-yukarı hareket ettirilir.";
+
+            case "kotu":
+                return
+                    "Serçe parmak açık tutulur ve el bilekten sağa-sola hareket ettirilir.";
+
+            default:
+                return
+                    "Görseldeki el şeklini ve hareket yönünü takip edin.";
+        }
+    }
+
+
+    // =====================================================
+    // KELİME GÖRSELİ
+    // =====================================================
 
     Sprite GetWordSignSprite(
         LearningItemData item
@@ -145,7 +288,9 @@ public class WordLearningController : MonoBehaviour
     {
         string displayNamePath =
             "WordSigns/" +
-            NormalizeFileName(item.displayName);
+            NormalizeFileName(
+                item.displayName
+            );
 
         Sprite sprite =
             Resources.Load<Sprite>(
@@ -162,9 +307,12 @@ public class WordLearningController : MonoBehaviour
             return sprite;
         }
 
+
         string labelPath =
             "WordSigns/" +
-            NormalizeFileName(item.modelLabel);
+            NormalizeFileName(
+                item.modelLabel
+            );
 
         sprite =
             Resources.Load<Sprite>(
@@ -176,6 +324,7 @@ public class WordLearningController : MonoBehaviour
             return sprite;
         }
 
+
         if (item.signImage != null)
         {
             return item.signImage;
@@ -184,14 +333,22 @@ public class WordLearningController : MonoBehaviour
         return null;
     }
 
+
+    // =====================================================
+    // DOSYA ADI NORMALİZASYONU
+    // =====================================================
+
     string NormalizeFileName(
         string text
     )
     {
         if (string.IsNullOrEmpty(text))
+        {
             return "";
+        }
 
-        text = text.ToLowerInvariant();
+        text =
+            text.ToLowerInvariant();
 
         text = text.Replace("ç", "c");
         text = text.Replace("ğ", "g");
@@ -205,10 +362,17 @@ public class WordLearningController : MonoBehaviour
         return text;
     }
 
+
+    // =====================================================
+    // SONRAKİ KELİME
+    // =====================================================
+
     public void NextWord()
     {
         if (recognitionInProgress)
+        {
             return;
+        }
 
         currentIndex++;
 
@@ -220,10 +384,17 @@ public class WordLearningController : MonoBehaviour
         UpdateWordDisplay();
     }
 
+
+    // =====================================================
+    // ÖNCEKİ KELİME
+    // =====================================================
+
     public void PreviousWord()
     {
         if (recognitionInProgress)
+        {
             return;
+        }
 
         currentIndex--;
 
@@ -236,10 +407,17 @@ public class WordLearningController : MonoBehaviour
         UpdateWordDisplay();
     }
 
+
+    // =====================================================
+    // KELİME SEÇİM PANELİ
+    // =====================================================
+
     public void OpenWordSelection()
     {
         if (recognitionInProgress)
+        {
             return;
+        }
 
         wordSelectionPanel.SetActive(true);
 
@@ -247,10 +425,12 @@ public class WordLearningController : MonoBehaviour
             .SetAsLastSibling();
     }
 
+
     public void CloseWordSelection()
     {
         wordSelectionPanel.SetActive(false);
     }
+
 
     public void SelectWord(
         int index
@@ -272,15 +452,23 @@ public class WordLearningController : MonoBehaviour
         CloseWordSelection();
     }
 
+
+    // =====================================================
+    // PRATİK
+    // =====================================================
+
     public void PracticeCurrentWord()
     {
         if (recognitionInProgress)
+        {
             return;
+        }
 
         StartCoroutine(
             PracticeWordRoutine()
         );
     }
+
 
     IEnumerator PracticeWordRoutine()
     {
@@ -293,13 +481,19 @@ public class WordLearningController : MonoBehaviour
             yield break;
         }
 
+
         LearningItemData currentItem =
             wordItems[currentIndex];
 
         recognitionInProgress = true;
 
-        feedbackText.text =
-            "DEĞERLENDİRİLİYOR...";
+
+        if (feedbackText != null)
+        {
+            feedbackText.text =
+                "DEĞERLENDİRİLİYOR...";
+        }
+
 
         RecognitionRequest request =
             new RecognitionRequest(
@@ -307,9 +501,13 @@ public class WordLearningController : MonoBehaviour
                 currentItem.modelLabel
             );
 
-        RecognitionResult result = default;
 
-        bool resultReceived = false;
+        RecognitionResult result =
+            default;
+
+        bool resultReceived =
+            false;
+
 
         yield return StartCoroutine(
             recognitionService.Recognize(
@@ -325,18 +523,23 @@ public class WordLearningController : MonoBehaviour
             )
         );
 
+
         if (!resultReceived)
         {
             if (
-                AudioManager.Instance != null
+                AudioManager.Instance !=
+                null
             )
             {
                 AudioManager.Instance
                     .PlayMistake();
             }
 
-            feedbackText.text =
-                "SONUÇ ALINAMADI";
+            if (feedbackText != null)
+            {
+                feedbackText.text =
+                    "SONUÇ ALINAMADI";
+            }
 
             recognitionInProgress =
                 false;
@@ -344,52 +547,71 @@ public class WordLearningController : MonoBehaviour
             yield break;
         }
 
+
         int score =
             Mathf.RoundToInt(
                 result.confidence * 100
             );
 
+
         bool correctLabel =
-            result.predictedLabel ==
-            currentItem.modelLabel;
+            string.Equals(
+                result.predictedLabel,
+                currentItem.modelLabel,
+                StringComparison
+                    .OrdinalIgnoreCase
+            );
+
 
         bool success =
             correctLabel &&
-            score >= minimumSuccessScore;
+            score >=
+            minimumSuccessScore;
+
 
         if (success)
         {
             if (
-                AudioManager.Instance != null
+                AudioManager.Instance !=
+                null
             )
             {
                 AudioManager.Instance
                     .PlaySuccess();
             }
 
-            feedbackText.text =
-                "BAŞARILI!" +
-                "\nSKOR: %" +
-                score;
+            if (feedbackText != null)
+            {
+                feedbackText.text =
+                    "BAŞARILI!" +
+                    "\nSKOR: %" +
+                    score;
+            }
         }
         else
         {
             if (
-                AudioManager.Instance != null
+                AudioManager.Instance !=
+                null
             )
             {
                 AudioManager.Instance
                     .PlayMistake();
             }
 
-            feedbackText.text =
-                "TEKRAR DENE" +
-                "\nTAHMİN: " +
-                result.predictedLabel +
-                " | SKOR: %" +
-                score;
+            if (feedbackText != null)
+            {
+                feedbackText.text =
+                    "TEKRAR DENE" +
+                    "\nTAHMİN: " +
+                    result.predictedLabel +
+                    " | SKOR: %" +
+                    score;
+            }
         }
 
-        recognitionInProgress = false;
+
+        recognitionInProgress =
+            false;
     }
 }
